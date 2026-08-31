@@ -11,13 +11,15 @@ Communicate with the user in Chinese unless the user asks for another language. 
 
 ## Collaboration cadence
 
-1. At the start of a new goal, list the files, each responsibility, and the planned commit scope. Wait for confirmation once; do not repeat the same inventory for later commits in that goal.
-2. Design in this order: entity → data → business → entry. A continuous work segment may cover several related layers and files, but each commit must represent one clear logical goal and must not bundle many independent features.
-3. Before every commit, report the files, a short change summary, and the checks to run. After every commit, pause and use this exact handoff:
+1. At the start of a new goal, list the files, each responsibility, and the planned commit scope for visibility. Then implement the agreed goal without waiting for a separate confirmation. Do not repeat the same inventory for later commits in that goal.
+2. Design in this order: entity → data → business → entry. A continuous work segment may cover several related layers and files, but each proposed commit must represent one clear logical goal and must not bundle many independent features.
+3. Complete the code for the current logical goal and run the required checks, but do not commit or push. Then report the files, a short change summary, the check results, and show the complete diff for the user to review.
+4. Wait for explicit approval after the user has reviewed the diff. Only then create the commit containing exactly the reviewed changes. If the user requests revisions, update the code, rerun checks, and show a new diff without committing.
+5. After every approved commit, pause and use this exact handoff:
 
-   `【停，等指令】已完成本次提交 [commit 信息]（共 X 个文件）。改动：[简要摘要]；检查：[检查结果]。请确认，无误后回复“继续”。`
+   `【停，等指令】已按确认完成本次提交 [commit 信息]（共 X 个文件）。改动：[简要摘要]；检查：[检查结果]。请确认，无误后回复“继续”。`
 
-4. Do not implement unconfirmed independent features in the current commit. A short description of the next scope is fine; do not write its code early.
+6. Do not implement the next independent feature while the current diff is awaiting approval. A short description of the next scope is fine; do not write its code early.
 
 ## Coding principles
 
@@ -51,7 +53,8 @@ Communicate with the user in Chinese unless the user asks for another language. 
 
 1. The business logic still works when generics are replaced with concrete types.
 2. A junior developer can find where data is queried and where rules are written.
-3. Project-root quality checks are green.
+3. Project-root quality checks are green before showing the diff.
 4. Important functions and conditions are documented without jargon overload.
-5. The commit contains only the previously reported files and logical goal.
-6. Secrets, tokens, and passwords do not appear in code, comments, logs, or commit messages.
+5. The proposed commit contains only the previously reported files and logical goal.
+6. Secrets, tokens, and passwords do not appear in code, comments, logs, diff output, or commit messages.
+7. The exact diff has been shown to the user, and no commit or push occurs before explicit approval.
