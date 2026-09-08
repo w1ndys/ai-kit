@@ -7,7 +7,7 @@ description: Use plain syntax and layered architecture for coding tasks with com
 
 This is an opt-in, project-specific coding workflow. Apply it only when the user explicitly invokes `$human-coding-contract` or asks for 人话编码契约、土法编码、分层交付, or the plain coding contract. Do not apply it as a global rule.
 
-Communicate with the user in Chinese unless the user asks for another language. Keep the fixed commit handoff phrase in Chinese.
+Communicate with the user in Chinese unless the user asks for another language. Keep the commit handoff in Chinese.
 
 ## Collaboration cadence
 
@@ -15,11 +15,29 @@ Communicate with the user in Chinese unless the user asks for another language. 
 2. Design in this order: entity → data → business → entry. A continuous work segment may cover several related layers and files, but each proposed commit must represent one clear logical goal and must not bundle many independent features.
 3. Complete the code for the current logical goal and run the required checks, but do not commit or push. Then report the files, a short change summary, the check results, and show the complete diff for the user to review.
 4. Wait for explicit approval after the user has reviewed the diff. Only then create the commit containing exactly the reviewed changes. If the user requests revisions, update the code, rerun checks, and show a new diff without committing.
-5. After every approved commit, pause and use this exact handoff:
+5. After every approved commit, pause and report with this exact structure. Use a short bullet list: more than one sentence, not a changelog.
 
-   `【停，等指令】已按确认完成本次提交 [commit 信息]（共 X 个文件）。改动：[简要摘要]；检查：[检查结果]。请确认，无误后回复“继续”。`
+   ```
+   【停，等指令】
 
-6. Do not implement the next independent feature while the current diff is awaiting approval. A short description of the next scope is fine; do not write its code early.
+   本次提交：[commit 信息]（共 X 个文件）
+
+   本次完成：
+   - [文件或模块]：[改了什么、解决了什么]
+   - [文件或模块]：[改了什么、解决了什么]
+
+   检查：
+   - [检查项]：[通过 / 失败及必要说明]
+
+   下一步：
+   - [下一个逻辑目标或待确认事项]（尚未开始编码）
+
+   请确认，无误后回复“继续”。
+   ```
+
+   “本次完成” must list the changed files or modules, one short line each, covering what changed and why. Do not collapse the work into a single sentence. Do not write a long change document. “检查” must name the commands or quality gates and whether they passed. “下一步” is required; if the overall goal is done, say so and list remaining confirmation or wrap-up items.
+
+6. Do not implement the next independent feature while waiting. The next scope belongs only in the “下一步” list; do not write its code early.
 
 ## Coding principles
 
