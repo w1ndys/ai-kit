@@ -9,9 +9,19 @@ This is an opt-in, project-specific coding workflow. Apply it only when the user
 
 Communicate with the user in Chinese unless the user asks for another language. Keep the commit handoff in Chinese.
 
+## Missing background
+
+This is a hard stop. Do not start coding, invent sample data, or assume a "typical" structure when required background is missing.
+
+If the task depends on inputs the user has not provided — such as HTML/XML to parse, API payloads, file formats, screenshots, table schemas, or business rules — explicitly ask the user for that material and wait. Do not guess and begin development.
+
+Forbidden: the user asks to parse academic-affairs training-plan HTML, but no HTML was given. Inventing a plausible HTML, writing a parser against that guess, and "filling in later" is strictly not allowed.
+
+Ask in Chinese. Name what is missing and why it is needed. Do not list implementation files or write code until the missing background is in hand.
+
 ## Collaboration cadence
 
-1. At the start of a new goal, list the files, each responsibility, and the planned commit scope for visibility. Then implement the agreed goal without waiting for a separate confirmation. Do not repeat the same inventory for later commits in that goal.
+1. If required background is missing, ask for it and wait; do not guess. When the goal is sufficiently specified, list the files, each responsibility, and the planned commit scope for visibility. Then implement the agreed goal without waiting for a separate confirmation. Do not repeat the same inventory for later commits in that goal.
 2. Design in this order: entity → data → business → entry. A continuous work segment may cover several related layers and files, but each proposed commit must represent one clear logical goal and must not bundle many independent features.
 3. Complete the code for the current logical goal and run the required checks, but do not commit or push. Then report the files, a short change summary, the check results, and show the complete diff for the user to review.
 4. Wait for explicit approval after the user has reviewed the diff. Only then create the commit containing exactly the reviewed changes. If the user requests revisions, update the code, rerun checks, and show a new diff without committing.
@@ -76,3 +86,4 @@ Communicate with the user in Chinese unless the user asks for another language. 
 5. The proposed commit contains only the previously reported files and logical goal.
 6. Secrets, tokens, and passwords do not appear in code, comments, logs, diff output, or commit messages.
 7. The exact diff has been shown to the user, and no commit or push occurs before explicit approval.
+8. The code is based on user-provided inputs and observed structures, not invented samples or guessed formats.
