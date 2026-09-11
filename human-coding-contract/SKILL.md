@@ -70,9 +70,12 @@ Ask in Chinese. Name what is missing and why it is needed. Do not list implement
 
 ## Comments and generics
 
-- Document parameters, return values, exceptions, and side effects for public interfaces or complex functions according to project conventions. Do not add repetitive comments to trivial functions.
-- Explain complex decisions, security boundaries, and important side effects in plain language. Do not narrate obvious code.
-- Add the reason and consequence beside each important condition.
+Comments are for the human reviewer. Every file, every function, and every `if` / `elif` / `else` / `switch` / `case` must have a short comment. One or two lines is enough; do not write a changelog in comments.
+
+- File: put a header comment at the top stating what this file is responsible for and which layer it belongs to.
+- Function: state what it does, and when needed the parameters, return value, exceptions, or side effects. Do not skip a function because it looks trivial.
+- Condition: comment what the judgment is for — the business purpose — not a restatement of the expression. Write the reason and the consequence. Forbidden: `// if user is null`. Required: `// 没有登录用户则无法查培养方案，直接返回`.
+- Explain complex decisions, security boundaries, and important side effects in plain language. Do not narrate obvious non-branching code such as increments or simple assignments.
 - Only basic generics are allowed, such as `List[T]`, `Ref[T]`, or `[T any]`. Before writing a generic function, ask the user:
 
   `这处泛型是为了复用 [逻辑]，写法是 [片段]，你能看懂吗？`
@@ -91,7 +94,7 @@ Ask in Chinese. Name what is missing and why it is needed. Do not list implement
 1. The business logic still works when generics are replaced with concrete types.
 2. A junior developer can find where data is queried and where rules are written.
 3. Project-root quality checks are green before showing the diff.
-4. Important functions and conditions are documented without jargon overload.
+4. Every file, function, and condition has a short comment: file purpose, function purpose, and what each judgment is for.
 5. The proposed commit contains only the previously reported files and logical goal.
 6. Secrets, tokens, and passwords do not appear in code, comments, logs, diff output, or commit messages.
 7. The exact diff has been shown to the user, and no commit or push occurs before explicit approval.
