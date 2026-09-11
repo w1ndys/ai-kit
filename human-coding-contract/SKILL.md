@@ -25,12 +25,12 @@ Ask in Chinese. Name what is missing and why it is needed. Do not list implement
 2. Design in this order: entity → data → business → entry. A continuous work segment may cover several related layers and files, but each proposed commit must represent one clear logical goal and must not bundle many independent features.
 3. Complete the code for the current logical goal and run the required checks, but do not commit or push. Then report the files, a short change summary, the check results, a review path, and show the complete diff for the user to review.
 
-   The review path is required every time the user is asked to review. Follow the layer order entity → data → business → entry; skip layers that did not change. List files in that reading order, one short line each, saying what to look at. This is a route for sequential review, not a changelog.
+   The review path is required every time the user is asked to review. Follow the layer order entity → data → business → entry; skip layers that did not change. Granularity must be the concrete function (or type/struct when there is no function). Do not stop at file level. List only changed functions, in that reading order, one short line each, saying what to look at. This is a route for sequential review, not a changelog.
 
    ```
    审阅路径：
-   1. [层] [文件]：[先看什么]
-   2. [层] [文件]：[接着看什么]
+   1. [层] [文件] [函数]：[先看什么]
+   2. [层] [文件] [函数]：[接着看什么]
    ```
 
 4. Wait for explicit approval after the user has reviewed the diff. Only then create the commit containing exactly the reviewed changes. If the user requests revisions, update the code, rerun checks, show a new diff, and give an updated review path without committing.
@@ -98,5 +98,5 @@ Comments are for the human reviewer. Every file, every function, and every `if` 
 5. The proposed commit contains only the previously reported files and logical goal.
 6. Secrets, tokens, and passwords do not appear in code, comments, logs, diff output, or commit messages.
 7. The exact diff has been shown to the user, and no commit or push occurs before explicit approval.
-8. A layer-ordered review path has been given so the user can read entity → data → business → entry in sequence.
+8. A layer-ordered review path has been given at function granularity so the user can read entity → data → business → entry, function by function.
 9. The code is based on user-provided inputs and observed structures, not invented samples or guessed formats.
