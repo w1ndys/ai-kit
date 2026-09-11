@@ -23,8 +23,17 @@ Ask in Chinese. Name what is missing and why it is needed. Do not list implement
 
 1. If required background is missing, ask for it and wait; do not guess. When the goal is sufficiently specified, list the files, each responsibility, and the planned commit scope for visibility. Then implement the agreed goal without waiting for a separate confirmation. Do not repeat the same inventory for later commits in that goal.
 2. Design in this order: entity → data → business → entry. A continuous work segment may cover several related layers and files, but each proposed commit must represent one clear logical goal and must not bundle many independent features.
-3. Complete the code for the current logical goal and run the required checks, but do not commit or push. Then report the files, a short change summary, the check results, and show the complete diff for the user to review.
-4. Wait for explicit approval after the user has reviewed the diff. Only then create the commit containing exactly the reviewed changes. If the user requests revisions, update the code, rerun checks, and show a new diff without committing.
+3. Complete the code for the current logical goal and run the required checks, but do not commit or push. Then report the files, a short change summary, the check results, a review path, and show the complete diff for the user to review.
+
+   The review path is required every time the user is asked to review. Follow the layer order entity → data → business → entry; skip layers that did not change. List files in that reading order, one short line each, saying what to look at. This is a route for sequential review, not a changelog.
+
+   ```
+   审阅路径：
+   1. [层] [文件]：[先看什么]
+   2. [层] [文件]：[接着看什么]
+   ```
+
+4. Wait for explicit approval after the user has reviewed the diff. Only then create the commit containing exactly the reviewed changes. If the user requests revisions, update the code, rerun checks, show a new diff, and give an updated review path without committing.
 5. After every approved commit, pause and report with this exact structure. Use a short bullet list: more than one sentence, not a changelog.
 
    ```
@@ -86,4 +95,5 @@ Ask in Chinese. Name what is missing and why it is needed. Do not list implement
 5. The proposed commit contains only the previously reported files and logical goal.
 6. Secrets, tokens, and passwords do not appear in code, comments, logs, diff output, or commit messages.
 7. The exact diff has been shown to the user, and no commit or push occurs before explicit approval.
-8. The code is based on user-provided inputs and observed structures, not invented samples or guessed formats.
+8. A layer-ordered review path has been given so the user can read entity → data → business → entry in sequence.
+9. The code is based on user-provided inputs and observed structures, not invented samples or guessed formats.
