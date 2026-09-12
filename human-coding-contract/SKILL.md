@@ -48,15 +48,21 @@ Ask in Chinese. Name what is missing and why it is needed. Do not list implement
    检查：
    - [检查项]：[通过 / 失败及必要说明]
 
-   下一步：
-   - [下一个逻辑目标或待确认事项]（尚未开始编码）
+   全部进度：
+   - [逻辑目标]：已完成
+   - [逻辑目标]：已完成（本轮）
+   - [逻辑目标]：当前下一步，尚未开始编码
+   - [逻辑目标]：未开始
+
+   当前下一步：
+   - [下一个逻辑目标]：[现在到哪一步 / 待确认事项]（尚未开始编码）
 
    请确认，无误后回复“继续”。
    ```
 
-   “本次完成” must list the changed files or modules, one short line each, covering what changed and why. Do not collapse the work into a single sentence. Do not write a long change document. “检查” must name the commands or quality gates and whether they passed. “下一步” is required; if the overall goal is done, say so and list remaining confirmation or wrap-up items.
+   “本次完成” must list the changed files or modules, one short line each, covering what changed and why. Do not collapse the work into a single sentence. Do not write a long change document. “检查” must name the commands or quality gates and whether they passed. “全部进度” is required: list every logical goal in the agreed overall scope, each with status (已完成 / 本轮完成 / 当前下一步 / 未开始). Do not omit earlier completed goals. “当前下一步” is required and must name the single next logical goal and how far it is (for example 尚未开始编码, or 待确认某项). If the overall goal is done, say so in “全部进度”, set “当前下一步” to remaining confirmation or wrap-up items, and do not invent extra work.
 
-6. Do not implement the next independent feature while waiting. The next scope belongs only in the “下一步” list; do not write its code early.
+6. Do not implement the next independent feature while waiting. The next scope belongs only in “当前下一步”; do not write its code early.
 
 ## Readability over sophistication
 
