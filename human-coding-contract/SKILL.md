@@ -1,129 +1,127 @@
 ---
 name: human-coding-contract
-description: 人话编码约定。分层直白实现、commit 闸门、静态检查必须过、风格全仓库一致、可读性优先于工程化与高级语法。用户提到人话编码契约、土法编码、分层交付、plain coding contract 或显式调用本 skill 时使用。
+description: Use plain syntax and layered architecture for coding tasks with commit-based progress reports; 中文触发词包括人话编码契约、土法编码和分层交付；仅在用户明确启用本 skill 时使用。
 ---
 
 # Human Coding Contract
 
-仅在用户显式调用 `$human-coding-contract`、提到人话编码契约 / 土法编码 / 分层交付 / plain coding contract 时启用。不要当全局默认规则。
+This is an opt-in, project-specific coding workflow. Apply it only when the user explicitly invokes `$human-coding-contract` or asks for 人话编码契约、土法编码、分层交付, or the plain coding contract. Do not apply it as a global rule.
 
-对用户用中文（用户要求其他语言除外）。commit 交接用中文。
+Communicate with the user in Chinese unless the user asks for another language. Keep the commit handoff in Chinese.
 
-## 缺背景就停
+## Missing background
 
-这是硬停。缺 HTML/XML、API、文件格式、截图、表结构、业务规则等必需输入时：不开始写代码、不编样例、不假设「典型结构」。用中文说明缺什么、为什么需要，等补齐。未到手之前不列实现文件、不写代码。
+This is a hard stop. Do not start coding, invent sample data, or assume a "typical" structure when required background is missing.
 
-## 协作节奏
+If the task depends on inputs the user has not provided — such as HTML/XML to parse, API payloads, file formats, screenshots, table schemas, or business rules — explicitly ask the user for that material and wait. Do not guess and begin development.
 
-1. 缺背景先问再等。目标足够清楚后，列出将改的文件、各自职责、本轮逻辑目标，然后直接实现，不再等一次确认。同一目标后续提交不要反复列同一份清单。
-2. 设计顺序：实体 → 数据 → 业务 → 入口。一段工作可跨多层多文件，但每次拟议提交只对应一个清晰逻辑目标，不捆绑多个独立功能。
-3. 写完当前逻辑目标并跑完检查，不 commit、不 push。报告文件、短摘要、检查结果、审阅路径、完整 diff。
+Forbidden: the user asks to parse academic-affairs training-plan HTML, but no HTML was given. Inventing a plausible HTML, writing a parser against that guess, and "filling in later" is strictly not allowed.
 
-   每次请人审都要给审阅路径。按层：实体 → 数据 → 业务 → 入口，没改的层跳过。粒度到函数（没有函数则到类型/结构），不要停在文件级。只列改过的函数，阅读顺序，一行说看什么。这是顺序阅读路线，不是 changelog。
+Ask in Chinese. Name what is missing and why it is needed. Do not list implementation files or write code until the missing background is in hand.
+
+## Collaboration cadence
+
+1. If required background is missing, ask for it and wait; do not guess. When the goal is sufficiently specified, list the files, each responsibility, and the planned commit scope for visibility. Then implement the agreed goal without waiting for a separate confirmation. Do not repeat the same inventory for later commits in that goal.
+2. Design in this order: entity → data → business → entry. A continuous work segment may cover several related layers and files, but each proposed commit must represent one clear logical goal and must not bundle many independent features.
+3. Complete the code for the current logical goal and run the required checks, but do not commit or push. Then report the files, a short change summary, the check results, a review path, and show the complete diff for the user to review.
+
+   The review path is required every time the user is asked to review. Follow the layer order entity → data → business → entry; skip layers that did not change. Granularity must be the concrete function (or type/struct when there is no function). Do not stop at file level. List only changed functions, in that reading order, one short line each, saying what to look at. This is a route for sequential review, not a changelog.
 
    ```
-   建议阅读顺序：
+   审阅路径：
    1. [层] [文件] [函数]：[先看什么]
    2. [层] [文件] [函数]：[接着看什么]
    ```
 
-4. 等人明确同意后，才把刚审过的改动打成提交。要求修改：改代码 → 再跑检查 → 新 diff + 新审阅路径，仍不提交。
-5. 每次已批准提交后暂停，用下面结构汇报（短列表，多句，不是 changelog）：
+4. Wait for explicit approval after the user has reviewed the diff. Only then create the commit containing exactly the reviewed changes. If the user requests revisions, update the code, rerun checks, show a new diff, and give an updated review path without committing.
+5. After every approved commit, pause and report with this exact structure. Use a short bullet list: more than one sentence, not a changelog.
 
    ```
-   好，本轮结束。
+   【停，等指令】
 
-   本次交接：[commit 信息]（含 X 个文件）
+   本次提交：[commit 信息]（共 X 个文件）
 
    本次完成：
-   - [文件]：改了什么、解决了什么
-   - [文件]：改了什么、解决了什么
+   - [文件或模块]：[改了什么、解决了什么]
+   - [文件或模块]：[改了什么、解决了什么]
 
    检查：
-   - [命令]：通过 / 失败及原因
+   - [检查项]：[通过 / 失败及必要说明]
 
    下一步：
-   - [下一独立目标]（尚未开始编码）
+   - [下一个逻辑目标或待确认事项]（尚未开始编码）
 
-   请审阅，不必回复「继续」。
+   请确认，无误后回复“继续”。
    ```
 
-   「本次完成」每个改动文件一行。「检查」写命令和质量门是否通过。「下一步」必填；整体目标已完成则说明，并列剩余确认或收尾项。
+   “本次完成” must list the changed files or modules, one short line each, covering what changed and why. Do not collapse the work into a single sentence. Do not write a long change document. “检查” must name the commands or quality gates and whether they passed. “下一步” is required; if the overall goal is done, say so and list remaining confirmation or wrap-up items.
 
-6. 等待期间不实现下一个独立功能。下一范围只出现在「下一步」里。
+6. Do not implement the next independent feature while waiting. The next scope belongs only in the “下一步” list; do not write its code early.
 
-不要因为文件已经打开就顺手清理、删接口或扩大重构。确属必要的依赖改动要说明原因。可选优化不得悄悄变成必做项。
+## Readability over sophistication
 
-## 可读性优先（硬约束）
+Plain, even unsophisticated syntax is allowed. Do not require heavy engineering: no extra architecture, abstraction layers, pattern stacks, DI, plugin systems, or package splits unless the existing project already uses them.
 
-允许语法不高级，不严格要求工程化（不必上完整架构、抽象层、设计模式堆、DI、插件化、过度拆包）。
+The code must be human-readable at a glance. Opening a file should show what this layer does, where data comes from and goes, and what each branch decides. Prefer obvious repetition over cleverness that has to be guessed.
 
-必须人类可读：打开文件能看出这层干什么、数据从哪来到哪去、分支在判什么。宁可直白重复，也不要「聪明」到要猜。
+A reader should be able to:
 
-一眼能理解的标准：
+- understand names without decoding them through comments
+- follow control flow top to bottom, with conditions stating business judgments
+- read the main path without first learning framework magic, metaprogramming, or type gymnastics
+- point to where data is queried and where rules are written
 
-- 名字说出意图，不靠注释翻译天书标识符
-- 控制流从上到下可读，分支条件写的是业务判断
-- 不需要先懂框架魔法、元编程或类型体操才能读主路径
-- 同事能指出「数据在哪查、规则写在哪」
+## Style consistency
 
-## 风格必须一致（硬约束）
+Style must stay consistent across modules and later work. New files follow the same naming, error handling, directory layout, comments, and import habits as existing code in the same layer. Reuse existing shared types, errors, logging, and validation; do not invent a parallel set per module.
 
-全仓库、跨模块、后续开发用同一套写法。新文件对齐同层已有代码的命名、错误处理、目录、注释和导入习惯。已有公共类型、错误、日志、校验则复用，禁止每个模块平行再造一套。
+Formatting, lint, and typecheck follow the repository's existing config. Do not add a second style for this feature, do not disable or bypass existing checks, and do not introduce naming or layout that conflicts with neighboring modules.
 
-格式化与 lint / 类型检查以仓库现有配置为准。不为本功能新增第二套风格规则，不关闭或绕过已有检查，不引入与邻接模块冲突的命名或目录习惯。
+## Coding principles
 
-## 编码原则
+- Prefer ordinary classes, explicit branches, direct dependencies, and traceable control flow.
+- Do not use decorator factories, reflection, metaclasses, dynamic code generation, pattern matching, nested comprehensions, the walrus operator, or type gymnastics.
+- Classic patterns are allowed when implemented with ordinary classes, interfaces, or map/dictionary dispatch. Do not use dynamic proxies or auto-discovery.
+- Keep dependencies one-way: entry → business → data. Do not cross layers or create circular dependencies.
+- Inject dependencies through constructor arguments or direct imports. Do not use DI containers, service auto-discovery, or annotation wiring.
+- Keep each function at or below 50 lines, excluding blank lines and comments. Split longer functions.
+- Do not hide business logic in vague `utils`, `common`, or `base` packages.
 
-- 普通类、显式分支、直接依赖、可追踪控制流。
-- 不要用装饰器工厂、反射、元类、动态代码生成、模式匹配、嵌套推导、海象运算符、类型体操。
-- 经典模式可以用普通类、接口或 map/字典分发。不要用动态代理或自动发现。
-- 依赖单向：入口 → 业务 → 数据。不要跨层或循环依赖。
-- 依赖通过构造函数参数或直接 import 注入。不要用 DI 容器、服务自动发现、注解编织。
-- 每个函数不超过 50 行（不含空行和注释），超了就拆。
-- 不要把业务逻辑藏进含糊的 `util`、`common`、`base`。
+## Comments and generics
 
-改之前沿用户操作 → 界面 → 请求 → 规则 → 保存 → 返回找到最小完整链路，优先复用已有组件、函数、类型和测试。不要只凭文件名判断已经实现。公共接口或跨模块：字段、类型、调用顺序、错误行为写死，不留「自行完善」。默认值、边界、重复操作、失败、状态变化、兼容性要有明确结论。数据 / 接口 / 生成物变更要追到直接消费者和必要的间接消费者。
+Comments are for the human reviewer. Every file, every function, and every `if` / `elif` / `else` / `switch` / `case` must have a short comment. One or two lines is enough; do not write a changelog in comments.
 
-## 注释与泛型
+- File: put a header comment at the top stating what this file is responsible for and which layer it belongs to.
+- Function: state what it does, and when needed the parameters, return value, exceptions, or side effects. Do not skip a function because it looks trivial.
+- Condition: comment what the judgment is for — the business purpose — not a restatement of the expression. Write the reason and the consequence. Forbidden: `// if user is null`. Required: `// 没有登录用户则无法查培养方案，直接返回`.
+- Explain complex decisions, security boundaries, and important side effects in plain language. Do not narrate obvious non-branching code such as increments or simple assignments.
+- Only basic generics are allowed, such as `List[T]`, `Ref[T]`, or `[T any]`. Before writing a generic function, ask the user:
 
-注释给审代码的人看。每个文件、每个函数、每个 `if` / `elif` / `else` / `switch` / `case` 必须有短注释。一两行即可，不要在注释里写 changelog。
+  `这处泛型是为了复用 [逻辑]，写法是 [片段]，你能看懂吗？`
 
-- 文件：文件头说明本文件职责和所属层。
-- 函数：做什么；必要时参数、返回、异常、副作用。看起来简单的函数也不要省。
-- 条件：注释判断的业务目的，不要复述表达式。写原因和后果。禁止：`// if user is null`。要求：`// 缺少登录用户时不能改规则，直接返回错误`。
-- 复杂决策、安全边界、重要副作用用白话说明。不要给递增、简单赋值等无分支代码写旁白。
+  If the user does not understand it, immediately use a concrete non-generic function.
 
-只允许基础泛型，例如 `List[T]`、`Ref[T]`、`[T any]`。写泛型函数前先问用户：
+  Do not use generics, type gymnastics, or "advanced" syntax in a way that splits style across modules.
 
-  `这个抽象是为了复用 [场景]，换成 [具体类型] 也能看懂吗？`
+## Quality gates
 
-用户不理解则立刻改成具体、非泛型函数。提交前：把泛型换成具体类型，业务仍必须成立。禁止用泛型、类型体操或「高级」写法造成模块间风格分裂。
+Static checks are required. Before showing a diff or committing, the change must pass this repository's existing static checks and typechecks. If the project has no command yet, say so and stop; do not skip, and do not "fix lint later". Treat every lint error as a bug and fix it before committing.
 
-## 静态检查（硬约束）
+- Go: run `golangci-lint run` and handle `if err != nil` explicitly.
+- Python: run `ruff check .`, never use a bare `except: pass`, and split long functions.
+- Vue/TypeScript: run `eslint` and `tsc --noEmit`; do not use `any` and keep types explicit.
+- Other languages: run the repo's existing static check and typecheck commands.
 
-任何语言：给人看 diff 或提交之前，必须通过该仓库已有的静态检查与类型检查。没有现成命令时先说明缺口，不准跳过、不准「先交后补」。lint 错误当 bug，修完再交付。
+## Pre-commit checklist
 
-已点名的栈额外执行：
-
-- Go：`golangci-lint run`；显式处理 `if err != nil`。
-- Python：`ruff check .`；禁止裸 `except: pass`；拆长函数。
-- Vue/TypeScript：`eslint` 与 `tsc --noEmit`；不用 `any`；类型写明白。
-
-修缺陷时优先用「缺陷存在则失败、修好则通过」的用例卡住。不要删失败断言、不要伪造结果、不要把模拟成功说成真实成功。本地构建绿不能当成用户流程可用。
-
-密钥、token、密码不得出现在代码、注释、日志、diff、提交说明里。
-
-## 提交前清单
-
-1. 泛型换成具体类型后业务仍成立。
-2. 初级开发者能找到数据在哪查、规则写在哪。
-3. 仓库已有静态检查与类型检查已绿；格式化与 lint 配置未被绕过。
-4. 每个文件、函数、条件都有短注释：文件职责、函数目的、判断在判什么。
-5. 拟议提交只含已汇报的文件和这一个逻辑目标。
-6. 密钥、token、密码不出现在代码、注释、日志、diff、提交说明里。
-7. 完整 diff 已给人看，未经明确同意不 commit、不 push。
-8. 已给出按层、到函数的审阅路径。
-9. 代码基于用户提供的输入和仓库里看到的结构，不是臆造样例或猜测格式。
-10. 新代码与同层已有模块风格一致；没有为本功能另起一套规范。
-11. 打开主路径能一眼读懂，没有靠高级语法或过度工程化才成立的结构。
+1. The business logic still works when generics are replaced with concrete types.
+2. A junior developer can find where data is queried and where rules are written.
+3. Project-root quality checks are green before showing the diff. Existing format/lint config is not bypassed.
+4. Every file, function, and condition has a short comment: file purpose, function purpose, and what each judgment is for.
+5. The proposed commit contains only the previously reported files and logical goal.
+6. Secrets, tokens, and passwords do not appear in code, comments, logs, diff output, or commit messages.
+7. The exact diff has been shown to the user, and no commit or push occurs before explicit approval.
+8. A layer-ordered review path has been given at function granularity so the user can read entity → data → business → entry, function by function.
+9. The code is based on user-provided inputs and observed structures, not invented samples or guessed formats.
+10. New code matches the style of existing modules in the same layer; no second style was introduced for this feature.
+11. The main path is readable at a glance and does not depend on advanced syntax or extra engineering to make sense.
