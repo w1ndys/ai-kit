@@ -23,23 +23,20 @@ Ask in Chinese. Name what is missing and why it is needed. Do not list implement
 
 1. If required background is missing, ask for it and wait; do not guess. When the goal is sufficiently specified, list the files, each responsibility, and the planned commit scope for visibility. Then implement the agreed goal without waiting for a separate confirmation. Do not repeat the same inventory for later commits in that goal.
 2. Design in this order: entity → data → business → entry. A continuous work segment may cover several related layers and files, but each proposed commit must represent one clear logical goal and must not bundle many independent features.
-3. Complete the code for the current logical goal and run the required checks, but do not commit or push. Then report the files, a short change summary, the check results, a review path, and show the complete diff for the user to review.
+3. Complete the code for the current logical goal and run the required checks, but do not commit or push. Pause once. In that same stop, show the complete diff, the review path, and the progress report. Do not wait for review and then wait again after the commit.
 
    The review path is required every time the user is asked to review. Follow the layer order entity → data → business → entry; skip layers that did not change. Granularity must be the concrete function (or type/struct when there is no function). Do not stop at file level. List only changed functions, in that reading order, one short line each, saying what to look at. This is a route for sequential review, not a changelog.
 
-   ```
-   审阅路径：
-   1. [层] [文件] [函数]：[先看什么]
-   2. [层] [文件] [函数]：[接着看什么]
-   ```
-
-4. Wait for explicit approval after the user has reviewed the diff. Only then create the commit containing exactly the reviewed changes. If the user requests revisions, update the code, rerun checks, show a new diff, and give an updated review path without committing.
-5. After every approved commit, pause and report with this exact structure. Use a short bullet list: more than one sentence, not a changelog.
+   Use this exact structure. Use a short bullet list: more than one sentence, not a changelog. Put the review path and the complete diff in the same message.
 
    ```
    【停，等指令】
 
-   本次提交：[commit 信息]（共 X 个文件）
+   拟议提交：[commit 信息]（共 X 个文件）
+
+   审阅路径：
+   1. [层] [文件] [函数]：[先看什么]
+   2. [层] [文件] [函数]：[接着看什么]
 
    本次完成：
    - [文件或模块]：[改了什么、解决了什么]
@@ -57,12 +54,14 @@ Ask in Chinese. Name what is missing and why it is needed. Do not list implement
    当前下一步：
    - [下一个逻辑目标]：[现在到哪一步 / 待确认事项]（尚未开始编码）
 
-   请确认，无误后回复“继续”。
+   请确认 diff 与进度，无误后回复“继续”。
    ```
 
    “本次完成” must list the changed files or modules, one short line each, covering what changed and why. Do not collapse the work into a single sentence. Do not write a long change document. “检查” must name the commands or quality gates and whether they passed. “全部进度” is required: list every logical goal in the agreed overall scope, each with status (已完成 / 本轮完成 / 当前下一步 / 未开始). Do not omit earlier completed goals. “当前下一步” is required and must name the single next logical goal and how far it is (for example 尚未开始编码, or 待确认某项). If the overall goal is done, say so in “全部进度”, set “当前下一步” to remaining confirmation or wrap-up items, and do not invent extra work.
 
-6. Do not implement the next independent feature while waiting. The next scope belongs only in “当前下一步”; do not write its code early.
+4. One “继续” means the diff is approved. Only then create the commit containing exactly the reviewed changes. Do not pause again after that commit. If the user requests revisions, update the code, rerun checks, and show the same combined stop (new diff, updated review path, updated progress) without committing.
+
+5. Do not implement the next independent feature while waiting. The next scope belongs only in “当前下一步”; do not write its code early. After “继续” and the commit, start that next goal unless the overall work is done.
 
 ## Readability over sophistication
 
