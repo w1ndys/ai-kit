@@ -23,11 +23,11 @@ Ask in Chinese. Name what is missing and why it is needed. Do not list implement
 
 1. If required background is missing, ask for it and wait; do not guess. When the goal is sufficiently specified, list the files, each responsibility, and the planned commit scope for visibility. Then implement the agreed goal without waiting for a separate confirmation. Do not repeat the same inventory for later commits in that goal.
 2. Design in this order: entity → data → business → entry. A continuous work segment may cover several related layers and files, but each proposed commit must represent one clear logical goal and must not bundle many independent features.
-3. Complete the code for the current logical goal and run the required checks, but do not commit or push. Pause once. In that same stop, show the complete diff, the review path, and the progress report. Do not wait for review and then wait again after the commit.
+3. Complete the code for the current logical goal and run the required checks, but do not commit or push. Pause once. In that same stop, show the review path and the progress report. Do not paste the full git diff into the conversation. Do not wait for review and then wait again after the commit.
 
    The review path is required every time the user is asked to review. Follow the layer order entity → data → business → entry; skip layers that did not change. Granularity must be the concrete function (or type/struct when there is no function). Do not stop at file level. List only changed functions, in that reading order, one short line each, saying what to look at. This is a route for sequential review, not a changelog.
 
-   Use this exact structure. Use a short bullet list: more than one sentence, not a changelog. Put the review path and the complete diff in the same message.
+   Use this exact structure. Use a short bullet list: more than one sentence, not a changelog.
 
    ```
    【停，等指令】
@@ -54,12 +54,12 @@ Ask in Chinese. Name what is missing and why it is needed. Do not list implement
    当前下一步：
    - [下一个逻辑目标]：[现在到哪一步 / 待确认事项]（尚未开始编码）
 
-   请确认 diff 与进度，无误后回复“继续”。
+   请确认审阅路径与进度，无误后回复“继续”。
    ```
 
    “本次完成” must list the changed files or modules, one short line each, covering what changed and why. Do not collapse the work into a single sentence. Do not write a long change document. “检查” must name the commands or quality gates and whether they passed. “全部进度” is required: list every logical goal in the agreed overall scope, each with status (已完成 / 本轮完成 / 当前下一步 / 未开始). Do not omit earlier completed goals. “当前下一步” is required and must name the single next logical goal and how far it is (for example 尚未开始编码, or 待确认某项). If the overall goal is done, say so in “全部进度”, set “当前下一步” to remaining confirmation or wrap-up items, and do not invent extra work.
 
-4. One “继续” means the diff is approved. Only then create the commit containing exactly the reviewed changes. Do not pause again after that commit. If the user requests revisions, update the code, rerun checks, and show the same combined stop (new diff, updated review path, updated progress) without committing.
+4. One “继续” means the changes are approved. Only then create the commit containing exactly the reviewed changes. Do not pause again after that commit. If the user requests revisions, update the code, rerun checks, and show the same combined stop (updated review path, updated progress) without committing. Do not paste the full git diff.
 
 5. Do not implement the next independent feature while waiting. The next scope belongs only in “当前下一步”; do not write its code early. After “继续” and the commit, start that next goal unless the overall work is done.
 
@@ -110,7 +110,7 @@ Comments are for the human reviewer. Every file, every function, and every `if` 
 
 ## Quality gates
 
-Static checks are required. Before showing a diff or committing, the change must pass this repository's existing static checks and typechecks. If the project has no command yet, say so and stop; do not skip, and do not "fix lint later". Treat every lint error as a bug and fix it before committing.
+Static checks are required. Before asking for review or committing, the change must pass this repository's existing static checks and typechecks. If the project has no command yet, say so and stop; do not skip, and do not "fix lint later". Treat every lint error as a bug and fix it before committing.
 
 - Go: run `golangci-lint run` and handle `if err != nil` explicitly.
 - Python: run `ruff check .`, never use a bare `except: pass`, and split long functions.
@@ -121,11 +121,11 @@ Static checks are required. Before showing a diff or committing, the change must
 
 1. The business logic still works when generics are replaced with concrete types.
 2. A junior developer can find where data is queried and where rules are written.
-3. Project-root quality checks are green before showing the diff. Existing format/lint config is not bypassed.
+3. Project-root quality checks are green before asking for review. Existing format/lint config is not bypassed.
 4. Every file, function, and condition has a short comment: file purpose, function purpose, and what each judgment is for.
 5. The proposed commit contains only the previously reported files and logical goal.
 6. Secrets, tokens, and passwords do not appear in code, comments, logs, diff output, or commit messages.
-7. The exact diff has been shown to the user, and no commit or push occurs before explicit approval.
+7. No commit or push occurs before explicit approval. Do not paste the full git diff into the conversation.
 8. A layer-ordered review path has been given at function granularity so the user can read entity → data → business → entry, function by function.
 9. The code is based on user-provided inputs and observed structures, not invented samples or guessed formats.
 10. New code matches the style of existing modules in the same layer; no second style was introduced for this feature.
