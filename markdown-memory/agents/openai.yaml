@@ -1,0 +1,7 @@
+interface:
+  display_name: "Markdown 记忆"
+  short_description: "按需蒸馏对话为分层 Markdown 记忆并写回文件"
+  default_prompt: "Use $markdown-memory to distill durable facts into the Markdown memory palace."
+
+policy:
+  allow_implicit_invocation: true
