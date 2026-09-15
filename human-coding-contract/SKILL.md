@@ -19,11 +19,36 @@ Forbidden: the user asks to parse academic-affairs training-plan HTML, but no HT
 
 Ask in Chinese. Name what is missing and why it is needed. Do not list implementation files or write code until the missing background is in hand.
 
+A requirements sentence such as “read the third column” is not an HTML sample. Do not invent `<table>` / `<tr>` / `<td>` markup, HAR-shaped pages, or “typical vendor HTML” to write a parser. Ask for a real page dump or HAR excerpt and wait.
+
+## File edits
+
+This is a hard rule, not a preference.
+
+Change source files, tests, and docs only with the dedicated editor tools provided to the agent: `Edit`, `Write`, or `apply_patch`.
+
+Forbidden ways to change those files:
+
+- `python` / `perl` / `ruby` scripts or one-liners that rewrite files
+- `sed` / `awk` / `ed` in-place patches
+- shell heredoc or `printf` redirected onto a source path
+- editing a copy under `/tmp` and overwriting the project file
+
+Shell is for running tests, git, formatters, and compilers — not for patching code.
+
+If `Edit` cannot find `old_string`:
+
+1. Read the file again and retry `Edit` with a smaller unique snippet.
+2. If it still fails, `Write` the full corrected file content.
+3. Do not “give up and use Python”.
+
+Running `gofmt` / `eslint --fix` from the shell after an editor change is allowed. Using the shell as a substitute for the editor is not.
+
 ## Collaboration cadence
 
 1. If required background is missing, ask for it and wait; do not guess. When the goal is sufficiently specified, list the files, each responsibility, and the planned commit scope for visibility. Then implement the agreed goal without waiting for a separate confirmation. Do not repeat the same inventory for later commits in that goal.
 2. Design in this order: entity → data → business → entry. A continuous work segment may cover several related layers and files, but each proposed commit must represent one clear logical goal and must not bundle many independent features.
-3. Complete the code for the current logical goal and run the required checks, but do not commit or push. Pause once. In that same stop, show the review path and the progress report. Do not paste the full git diff into the conversation. Do not wait for review and then wait again after the commit.
+3. Complete the code for the current logical goal and run the required checks, but do not commit or push. Pause once. In that same stop, show the review path and the progress report. Do not paste the full git diff into the conversation. Do not wait for review and then wait again after the commit. The exact 【停，等指令】 block below is mandatory; a casual prose summary does not count. Do not skip the template because the change looks small.
 
    The review path is required every time the user is asked to review. Follow the layer order entity → data → business → entry; skip layers that did not change. Granularity must be the concrete function (or type/struct when there is no function). Do not stop at file level. List only changed functions, in that reading order, one short line each, saying what to look at. This is a route for sequential review, not a changelog.
 
@@ -130,3 +155,4 @@ Static checks are required. Before asking for review or committing, the change m
 9. The code is based on user-provided inputs and observed structures, not invented samples or guessed formats.
 10. New code matches the style of existing modules in the same layer; no second style was introduced for this feature.
 11. The main path is readable at a glance and does not depend on advanced syntax or extra engineering to make sense.
+12. Source, tests, and docs were changed only with Edit / Write / apply_patch; no shell or Python rewriting.
