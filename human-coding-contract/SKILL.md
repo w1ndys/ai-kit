@@ -79,14 +79,14 @@ Running `gofmt` / `eslint --fix` from the shell after an editor change is allowe
    当前下一步：
    - [下一个逻辑目标]：[现在到哪一步 / 待确认事项]（尚未开始编码）
 
-   请确认审阅路径与进度，无误后回复“继续”。
+   请确认审阅路径与进度，无误后回复“继续”或“1”。
    ```
 
    “本次完成” must list the changed files or modules, one short line each, covering what changed and why. Do not collapse the work into a single sentence. Do not write a long change document. “检查” must name the commands or quality gates and whether they passed. “全部进度” is required: list every logical goal in the agreed overall scope, each with status (已完成 / 本轮完成 / 当前下一步 / 未开始). Do not omit earlier completed goals. “当前下一步” is required and must name the single next logical goal and how far it is (for example 尚未开始编码, or 待确认某项). If the overall goal is done, say so in “全部进度”, set “当前下一步” to remaining confirmation or wrap-up items, and do not invent extra work.
 
-4. One “继续” means the changes are approved. Only then create the commit containing exactly the reviewed changes. Do not pause again after that commit. If the user requests revisions, update the code, rerun checks, and show the same combined stop (updated review path, updated progress) without committing. Do not paste the full git diff.
+4. A user reply of `1` is equivalent to `继续`. Either means the changes are approved. Only then create the commit containing exactly the reviewed changes. Do not pause again after that commit. If the user requests revisions, update the code, rerun checks, and show the same combined stop (updated review path, updated progress) without committing. Do not paste the full git diff.
 
-5. Do not implement the next independent feature while waiting. The next scope belongs only in “当前下一步”; do not write its code early. After “继续” and the commit, start that next goal unless the overall work is done.
+5. Do not implement the next independent feature while waiting. The next scope belongs only in “当前下一步”; do not write its code early. After `继续` or `1` and the commit, start that next goal unless the overall work is done.
 
 ## Readability over sophistication
 
