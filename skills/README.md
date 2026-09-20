@@ -4,6 +4,7 @@
 
 | Skill | 说明 |
 |---|---|
+| [astrbot-new-plugin](astrbot-new-plugin/) | 按官方文档 + 现仓惯例新建独立 AstrBot 插件仓 |
 | [grilling](grilling/) | 对计划、决策或想法持续追问，压测思路 |
 | [human-coding-contract](human-coding-contract/) | 人话编码契约：朴素语法、分层架构、按提交汇报进度 |
 | [markdown-memory](markdown-memory/) | 把对话蒸馏成分层 Markdown 记忆 |
