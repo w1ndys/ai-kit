@@ -5,7 +5,7 @@ description: Distill conversations into layered Markdown memory files (preferenc
 
 # Markdown 记忆
 
-把对话蒸馏成可分层加载的 Markdown。禁止存原文。完整协议：https://github.com/w1ndys/prompts/blob/main/docs/loci-markdown-generation.md
+把对话蒸馏成可分层加载的 Markdown。禁止存原文。完整协议：https://github.com/w1ndys/ai-kit/blob/main/docs/loci-markdown-generation.md
 
 先回答人，再检查信号。无信号不写。有信号才路由写入。确认最多一句人话，不报路径。
 
