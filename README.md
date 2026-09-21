@@ -3,6 +3,7 @@
 个人收集、自用的文档、Skill 与 Prompt。
 
 - [`docs/`](docs/)：接口、协议、工具、部署和审计等技术文档。
+- [`blog/`](blog/)：部署和排障踩坑日志。
 - [`prompt/`](prompt/)：用于 AI 协作、代码生成、审计和项目规划的 Prompt。
 - [`skills/`](skills/)：可安装的 Agent Skill（每个子目录一份 `SKILL.md`）。
 
