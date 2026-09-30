@@ -1,3 +1,4 @@
 interface:
   display_name: "新建 AstrBot 插件"
-  short_description: "按官方文档开独立插件仓，配置优先 WebUI"
+  short_description: "按官方文档开独立插件仓；简单字段走 schema，复杂数据进库和自定义页"
+

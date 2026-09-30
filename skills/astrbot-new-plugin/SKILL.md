@@ -49,7 +49,7 @@ description: 按官方插件开发文档和 W1ndys 现仓惯例新建独立 Astr
 - 日志用 `from astrbot.api import logger`，不要用 `logging`。
 - 大文件 / 业务库放 `data/plugin_data/{plugin_name}/`。用 `StarTools.get_data_dir()`。KV（`put_kv_data`）只适合极少临时数据，不当业务表。
 - 不要用 `requests`，用 `aiohttp` / `httpx`。有第三方依赖才写 `requirements.txt`。
-- 插件页面放 `pages/<page_name>/index.html`。脚本必须 `type="module"`，通过 `window.AstrBotPluginPage` 调后端。后端用 `context.register_web_api(route, handler, methods, desc)`，路由必须带插件名前缀。页面 endpoint 不带插件名。请求和响应用 `astrbot.api.web` 的 `request` / `json_response` / `error_response`，不要把 Quart 原始对象当新插件的公共 API。
+- 插件页面放 `pages/<page_name>/index.html`。我们打成 IIFE 后用普通 `<script defer src="./assets/index.js">`，不要运行时 ESM/CDN。通过 `window.AstrBotPluginPage` 调后端。后端用 `context.register_web_api(route, handler, methods, desc)`，路由必须带插件名前缀。页面 endpoint 不带插件名。请求和响应用 `astrbot.api.web` 的 `request` / `json_response` / `error_response`，不要把 Quart 原始对象当新插件的公共 API。
 - 主动推送用 `event.unified_msg_origin` 记下的会话串，或官方格式 `platform_id:GroupMessage:group_id`，再 `context.send_message(umo, MessageChain)`。平台 ID 含冒号时不要自己拼。
 - 密钥类配置在 `_conf_schema.json` 标 `"secret": true`。
 - 只有产品本身必须接消息时才写消息 Handler。`@filter.command` 不能带空格。事件钩子不能跟 command / `event_message_type` 叠在一起；钩子里发消息用 `event.send()`，不能 `yield`。
@@ -75,7 +75,7 @@ description: 按官方插件开发文档和 W1ndys 现仓惯例新建独立 Astr
 
 ## 自定义页和官方配置页
 
-有 `pages/` 的插件必须另做一页**全局配置**（例如 `pages/settings/`）：
+有 `pages/` 的插件必须另做**全局配置**（单独一页，或唯一页里的一个 Tab）：
 
 - 按 `_conf_schema.json` **手写**非密钥字段，不要运行时读 JSON 自动生成表单。
 - 打开页面时读 schema 当前值，不要用过期表单回写。
@@ -125,8 +125,8 @@ astrbot_plugin_<name>/
   data/               SQLite + 内存快照；连库建表放 data/db.py
   business/           校验、匹配、文案、覆盖回落
   main.py             注册 WebUI API，必要时才接消息
-  pages/settings/     有 Pages 时必有：手写非密钥 schema 字段并写回
-  pages/<page_name>/  业务表增删改查，不管密钥、不塞全量 schema
+  dashboard/          Pages 源码（Vite + React）
+  pages/<page_name>/  构建产物：index.html + assets/；优先一个路由
   metadata.yaml
   _conf_schema.json   简单字段；不放业务表
   requirements.txt    有第三方依赖才写
@@ -137,9 +137,19 @@ astrbot_plugin_<name>/
 
 连库、建表放 `data/db.py`。表结构和业务 SQL 留在各自 `data/*_store.py`。每个插件自己管自己的表，不抽跨插件公共模块，也不要再开 `_shared/`、`common/`、`utils/` 当底座。
 
+## Pages 前端
+
+React 18 + antd 5。源码 `dashboard/`，Vite 打成 **一份 IIFE** 放到 `pages/<page>/assets/index.js`。细则和踩坑见 [docs/astrbot-plugin-pages-cdn.md](../../docs/astrbot-plugin-pages-cdn.md)。
+
+- 构建后 HTML 必须是 `<script defer src="./assets/index.js">`，不要 `type="module"` 拆文件，不要 esm.sh / importmap。
+- 多块业务用页内 antd `Tabs` 改 React state。宿主只要一条路由。不要点 Tab 去改顶层 hash。
+- 对照：[群日常分析](https://github.com/SXP-Simon/astrbot_plugin_qq_group_daily_analysis) 的 `dashboard/vite.config.ts`。
+
+
 ## 分层
 
 入口不直接查库。依赖单向：`main.py` → `business/` → `data/`。`entity/` 不依赖 AstrBot，也不访问数据库。覆盖回落写在 `business/`，不要在 `main.py` 里散落 `config.get` 和查库。
+
 
 | 层 | 目录 | 职责 |
 |---|---|---|
@@ -251,6 +261,8 @@ const result = await bridge.apiGet("settings");
 - [ ] `entity/` / `data/` / `business/` / `main.py` 分层；入口不直接查库
 - [ ] 简单字段在 `_conf_schema.json`（含短名单）；业务行和每群覆盖在 SQLite+Pages，而不是群口令
 - [ ] 有 Pages 时存在全局配置页：手写非密钥 schema 字段，读当前值，`save_config()` 写回；密钥不出现在页面和接口
+- [ ] Pages 用 Vite IIFE 单文件；HTML 是 `script defer`；多块业务页内 Tab，不改顶层 hash
+
 - [ ] 覆盖未写（NULL）运行时继承 schema 当前值；空串是覆盖；功能群名单空即关
 - [ ] 没有把 schema 默认值在首次打开时拷进 SQLite
 - [ ] `StarTools.get_data_dir()` 下自建 SQLite（有业务表时）
