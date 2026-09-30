@@ -1,11 +1,11 @@
 ---
 name: astrbot-new-plugin
-description: 按官方插件开发文档和 W1ndys 现仓惯例新建独立 AstrBot 插件。配置优先走 WebUI。用户说新建 AstrBot 插件、开一个 astrbot_plugin_、插件页面或 WebUI 配置时使用。
+description: 按官方插件开发文档和 W1ndys 现仓惯例新建独立 AstrBot 插件。简单字段走 WebUI schema，复杂数据进库和自定义页。用户说新建 AstrBot 插件、开一个 astrbot_plugin_、插件页面或 WebUI 配置时使用。
 ---
 
 # 新建 AstrBot 插件
 
-按官方插件开发文档落地独立仓库，再叠本 skill 钉住的分层和 WebUI 配置。不要从群规仓整棵复制业务，也不要默认做群消息命令。
+按官方插件开发文档落地独立仓库，再叠本 skill 钉住的分层和存储约定。不要从群规仓整棵复制业务，也不要默认做群消息命令。
 
 用中文和用户交流。缺插件短名时先问，不要猜一个名字开仓。
 
@@ -18,7 +18,7 @@ description: 按官方插件开发文档和 W1ndys 现仓惯例新建独立 Astr
 ## 冲突时听谁的
 
 1. **官方文档**：API、目录名、`main.py` / `metadata.yaml`、存储路径、Pages、配置 schema、过滤器语义、热重载。写之前打开对应文档，以文档当前文本为准。不要把官方全书抄进本 skill，也不要凭记忆写 API。
-2. **本 skill**：产品形态。一插件一仓、配置优先 WebUI、开关默认关、不抽跨插件公共模块。群消息命令不是新插件的默认入口。
+2. **本 skill**：产品形态。一插件一仓、简单字段走 schema、复杂数据进库+Pages、开关默认关、不抽跨插件公共模块。群消息命令不是新插件的默认入口。
 
 ## 官方开发文档
 
@@ -55,28 +55,57 @@ description: 按官方插件开发文档和 W1ndys 现仓惯例新建独立 Astr
 - 只有产品本身必须接消息时才写消息 Handler。`@filter.command` 不能带空格。事件钩子不能跟 command / `event_message_type` 叠在一起；钩子里发消息用 `event.send()`，不能 `yield`。
 - `llm_tool` 把结果 `return str` 给模型。docstring 必须有 `Args:` 段，格式 `参数名(类型): 描述`。
 
-## 配置优先 WebUI
+## 存储：简单走 schema，复杂进库
 
-新插件的配置和业务数据不要做成群口令。
+新插件的配置和业务数据不要做成群口令。schema 能表达的都进 `_conf_schema.json`；行级增删改查、流水、大对象、每群覆盖进 SQLite，并用自定义页维护。
 
 | 数据 | 放哪 | 文档 |
 |---|---|---|
-| 超时、平台 ID、开关默认值这类全局标量 | `_conf_schema.json` | [插件配置](https://docs.astrbot.app/dev/star/guides/plugin-config.html) |
-| 群列表、规则表、需要增删改查的业务行 | SQLite + `pages/<page_name>/` | [插件 Pages](https://docs.astrbot.app/dev/star/guides/plugin-pages.html) |
-| 密钥 | `_conf_schema.json`，标 `secret: true` | 同上 |
+| 标量、枚举、短 list、功能开没开的群号名单、开关默认值 | `_conf_schema.json` | [插件配置](https://docs.astrbot.app/dev/star/guides/plugin-config.html) |
+| 密钥（webhook、token） | `_conf_schema.json`，标 `secret: true` | 同上 |
+| 规则表、日志流水、大对象、需要筛选翻页的行、每群字段覆盖 | SQLite + `pages/<page_name>/` | [插件 Pages](https://docs.astrbot.app/dev/star/guides/plugin-pages.html) |
 
-`_conf_schema.json` 不放业务表。表进 SQLite。热路径读内存快照；写的时候先落库再改内存，落库失败整条不算。表里没有记录就当关闭。
+`_conf_schema.json` 不放业务表。表进 SQLite。热路径读内存快照；写的时候先落库再改内存，落库失败整条不算。
+
+功能开没开的群号名单：空名单即关。不要把空名单解释成「继承成开」。
 
 群消息命令只在用户明确要求「在群里用口令操作」时才加。旧群规仓的「某某 开 / 某某 关」不要复制到新插件。新插件默认没有这类口令。
+
+结构对照（只借鉴分层，不搬 dashboard 工程）：[SXP-Simon/astrbot_plugin_qq_group_daily_analysis](https://github.com/SXP-Simon/astrbot_plugin_qq_group_daily_analysis) 把天数、开关、短名单放 schema，任务/日志/报告进自建库和自定义页。它的 `inherit` 是名单套名单，本 skill **不照搬**那种整份名单继承。
+
+## 自定义页和官方配置页
+
+有 `pages/` 的插件必须另做一页**全局配置**（例如 `pages/settings/`）：
+
+- 按 `_conf_schema.json` **手写**非密钥字段，不要运行时读 JSON 自动生成表单。
+- 打开页面时读 schema 当前值，不要用过期表单回写。
+- 保存时改 `self.config` 对应键，再 `self.config.save_config()`。官方插件配置页和这一页都能写同一字段，后保存的赢。
+- **密钥字段不展示、不编辑。** webhook / token 只在 AstrBot 官方插件配置页改。
+- 其它业务页（日志、词库、覆盖表）只管自己的表，不要把禁言秒数一类 schema 字段塞进每一页。
+
+没有复杂表、也不需要每群覆盖时，可以只有 `_conf_schema.json`、不做 Pages。一旦做了 Pages，全局配置页就要有。
+
+## 每群覆盖：未配置则运行时继承 WebUI
+
+推荐字段级回落，不推荐整份配置 blob 继承。
+
+- 全局默认在 schema（含字段 `default`）。
+- 每群/每行覆盖在 SQLite。库里**缺字段或 SQL NULL** → 运行时读 schema **当前值**。
+- **空串是有效覆盖**（这群不发提醒、不用文案），不是继承。
+- 不要在首次打开覆盖页时把全局值拷进库。拷进去之后 WebUI 再改，库里还是旧的。
+- 功能群名单空即关，不走这套继承。
+- 密钥不进库、不继承。
+
+运行时先取覆盖行，覆盖未写再用 `self.config`。不要为了「继承」再做一份名单模式枚举，除非产品自己就是多层名单（那种情况单独设计，不写进本 skill 当默认）。
 
 ## 对照现仓，不要每次从群规仓抄
 
 | 仓库 | 形态 | 怎么对待 |
 |---|---|---|
-| [astrbot_plugin_w1ndys_rules](https://github.com/w1ndys/astrbot_plugin_w1ndys_rules) | 旧群规，群口令开关 | 只作历史对照。新插件不要抄它的开/关口令 |
-| [astrbot_plugin_prompt_ctf](https://github.com/w1ndys/astrbot_plugin_prompt_ctf) | 代码判胜负 | 输赢不交给模型。配置仍优先 WebUI |
+| [astrbot_plugin_w1ndys_rules](https://github.com/w1ndys/astrbot_plugin_w1ndys_rules) | 群规。开关迁 WebUI 名单；复杂表和覆盖按本 skill 后续迁 | 新插件不要抄群口令开/关。存储切分以本 skill 为准，不要抄旧 SQLite 开关表 |
+| [astrbot_plugin_prompt_ctf](https://github.com/w1ndys/astrbot_plugin_prompt_ctf) | 代码判胜负 | 输赢不交给模型。配置仍按本 skill 切分 |
 | [astrbot_plugin_qq_agent](https://github.com/w1ndys/astrbot_plugin_qq_agent) | NL 群管 | 群管沿用这个仓，不要为同一套 OneBot 群管再开仓 |
-| [astrbot_plugin_codex_reset](https://github.com/w1ndys/astrbot_plugin_codex_reset) | WebUI 维护开启群，后台推送 | 新插件配置页按这个方向做 |
+| [astrbot_plugin_codex_reset](https://github.com/w1ndys/astrbot_plugin_codex_reset) | WebUI 维护开启群，后台推送 | 短名单可以放 schema list |
 | [w1ndys-astrbot-plugins](https://github.com/w1ndys/w1ndys-astrbot-plugins) | 已归档 | **一插件一仓库**，不要回去 |
 
 旧 skill 仓 [w1ndys/skills](https://github.com/w1ndys/skills) 已迁入本仓 `skills/`。新 skill 也写在这里，不要写回旧仓。
@@ -85,7 +114,7 @@ description: 按官方插件开发文档和 W1ndys 现仓惯例新建独立 Astr
 
 1. 问清插件短名和一句话职责。仓名 `astrbot_plugin_<name>`。
 2. 新建**独立** GitHub 仓库，不要推进已归档 monorepo。
-3. 按下面骨架落文件。插件类必须在 `main.py`。配置走 WebUI，不先写群口令。
+3. 按下面骨架落文件。插件类必须在 `main.py`。简单字段走 schema，不先写群口令。有业务表或每群覆盖才加 Pages；有 Pages 就加全局配置页。
 4. 从本仓拷 `human-coding-contract` 到新仓 `.agents/skills/` 和 `.ohmyagent/skills/`，`AGENTS.md` 写明本仓默认启用，不必每次喊触发词。
 5. 开发时把仓 clone 进 `AstrBot/data/plugins/<插件名>`。改完 WebUI 重载。
 6. 做完在 `dev-cycle/projects/<repo-name>/` 登记，并更新根索引。周期说明按 `dev-cycle` skill，不要把业务源码写进那个仓。
@@ -93,29 +122,30 @@ description: 按官方插件开发文档和 W1ndys 现仓惯例新建独立 Astr
 ```text
 astrbot_plugin_<name>/
   entity/             固定值、数据形状
-  data/               SQLite + 内存快照
-  business/           校验、匹配、文案
+  data/               SQLite + 内存快照；连库建表放 data/db.py
+  business/           校验、匹配、文案、覆盖回落
   main.py             注册 WebUI API，必要时才接消息
-  pages/<page_name>/  有业务表时的增删改查页
+  pages/settings/     有 Pages 时必有：手写非密钥 schema 字段并写回
+  pages/<page_name>/  业务表增删改查，不管密钥、不塞全量 schema
   metadata.yaml
-  _conf_schema.json   仅全局标量，不放业务表
+  _conf_schema.json   简单字段；不放业务表
   requirements.txt    有第三方依赖才写
   tests/
   AGENTS.md
   __init__.py
 ```
 
-`_shared/` 只放**本插件内**重复底座（例如本仓自己的 SQLite connect）。每个插件自己管自己的表，不抽跨插件公共模块。
+连库、建表放 `data/db.py`。表结构和业务 SQL 留在各自 `data/*_store.py`。每个插件自己管自己的表，不抽跨插件公共模块，也不要再开 `_shared/`、`common/`、`utils/` 当底座。
 
 ## 分层
 
-入口不直接查库。依赖单向：`main.py` → `business/` → `data/`。`entity/` 不依赖 AstrBot，也不访问数据库。
+入口不直接查库。依赖单向：`main.py` → `business/` → `data/`。`entity/` 不依赖 AstrBot，也不访问数据库。覆盖回落写在 `business/`，不要在 `main.py` 里散落 `config.get` 和查库。
 
 | 层 | 目录 | 职责 |
 |---|---|---|
 | 实体 | `entity/` | 固定值和数据形状 |
-| 数据 | `data/`、可选 `_shared/` | SQLite 与内存快照 |
-| 业务 | `business/` | 校验、匹配、文案 |
+| 数据 | `data/` | SQLite 与内存快照；连库建表放 `data/db.py` |
+| 业务 | `business/` | 校验、匹配、文案、覆盖是否继承 schema |
 | 入口 | `main.py`、`pages/` | WebUI API 和页面。只有必须接消息时才写 Handler |
 
 设计顺序：实体 → 数据 → 业务 → 入口。函数（不含空行和注释）≤ 50 行。每个文件、每个函数、每个 `if` 写短中文注释（判断目的和后果）。
@@ -150,14 +180,30 @@ class Plugin(Star):
         super().__init__(context)
         self.config = config
         context.register_web_api(
-            f"/{PLUGIN_NAME}/items",
-            self.page_list_items,
+            f"/{PLUGIN_NAME}/settings",
+            self.page_get_settings,
             ["GET"],
-            "列出业务行",
+            "读取非密钥全局配置",
+        )
+        context.register_web_api(
+            f"/{PLUGIN_NAME}/settings",
+            self.page_save_settings,
+            ["PUT"],
+            "写回非密钥全局配置",
         )
 
-    async def page_list_items(self):
-        return json_response({"items": []})
+    async def page_get_settings(self):
+        # 只回非密钥字段。打开页必须是 schema 当前值。
+        return json_response({"guideline": (self.config or {}).get("guideline") or ""})
+
+    async def page_save_settings(self):
+        payload = await request.json(default={})
+        # 不是对象就写不回去
+        if not isinstance(payload, dict):
+            return error_response("请求体必须是 JSON 对象", status_code=400)
+        self.config["guideline"] = str(payload.get("guideline") or "")
+        self.config.save_config()
+        return json_response({"ok": True})
 ```
 
 页面：
@@ -169,10 +215,10 @@ class Plugin(Star):
 ```javascript
 const bridge = window.AstrBotPluginPage;
 await bridge.ready();
-const result = await bridge.apiGet("items");
+const result = await bridge.apiGet("settings");
 ```
 
-主动推送见[发消息](https://docs.astrbot.app/dev/star/guides/send-message.html)。先有 `unified_msg_origin` 或可拼的平台 ID，再 `context.send_message`。
+主动推送见[发消息](https://docs.astrbot.app/dev/star/guides/send-message.html)。先有 `unified_msg_origin` 或可拼的平台 ID，再 `context.send_message`。写回配置见[插件配置](https://docs.astrbot.app/dev/star/guides/plugin-config.html) 的 `save_config()`。
 
 ## 消息和模型
 
@@ -186,8 +232,8 @@ const result = await bridge.apiGet("items");
 
 - 仓内默认启用 `human-coding-contract`（写进 `AGENTS.md`）。
 - 提交前跑 `python3 -m unittest`。现仓还没有 ruff 配置时，不要假装跑过 ruff。
-- 测试用 `unittest` + 临时目录 SQLite。不要连真的 AstrBot。
-- 密钥、token、密码不进代码、注释、日志、diff、提交信息。
+- 测试用 `unittest` + 临时目录 SQLite。不要连真的 AstrBot。覆盖回落要测：NULL 用 schema、空串不用 schema。
+- 密钥、token、密码不进代码、注释、日志、diff、提交信息，也不进 Pages 接口。
 - `__init__.py` 只标明这是插件包，真正注册在 `main.py`。
 - `.gitignore` 忽略 `__pycache__/`、`*.db`、虚拟环境；**不要**忽略 `.agents/` 和 `.ohmyagent/`。
 - 提交信息中文，格式 `类型(内容): 中文描述`。未经用户明确允许不要 push。
@@ -203,12 +249,15 @@ const result = await bridge.apiGet("items");
 - [ ] 独立仓库，名符合 `astrbot_plugin_`；不是 monorepo 子目录
 - [ ] 有 `main.py`（插件类在此）和已改过的 `metadata.yaml`
 - [ ] `entity/` / `data/` / `business/` / `main.py` 分层；入口不直接查库
-- [ ] 配置优先 WebUI：标量在 `_conf_schema.json`，业务行在 Pages，而不是群口令
-- [ ] `StarTools.get_data_dir()` 下自建 SQLite；没记录等于关
+- [ ] 简单字段在 `_conf_schema.json`（含短名单）；业务行和每群覆盖在 SQLite+Pages，而不是群口令
+- [ ] 有 Pages 时存在全局配置页：手写非密钥 schema 字段，读当前值，`save_config()` 写回；密钥不出现在页面和接口
+- [ ] 覆盖未写（NULL）运行时继承 schema 当前值；空串是覆盖；功能群名单空即关
+- [ ] 没有把 schema 默认值在首次打开时拷进 SQLite
+- [ ] `StarTools.get_data_dir()` 下自建 SQLite（有业务表时）
 - [ ] `AGENTS.md` 默认启用 human-coding-contract
 - [ ] `tests/` 里至少有一个能跑的桩（`python3 -m unittest`）
 - [ ] `_conf_schema.json` 没有业务表；密钥项有 `secret: true`
-- [ ] 没引入 `requests`；没抽跨插件公共包
+- [ ] 没引入 `requests`；没抽跨插件公共包；没自动生成 schema 表单
 - [ ] 写过的 API 能在上面的官方文档里对上
 - [ ] 已在 `dev-cycle/projects/<repo-name>/` 登记
 - [ ] 没违反官方 `main.py` / `metadata.yaml` / `data/plugin_data/{plugin_name}/` / Pages 约定
