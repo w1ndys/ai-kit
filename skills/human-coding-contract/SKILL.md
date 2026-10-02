@@ -1,6 +1,6 @@
 ---
 name: human-coding-contract
-description: Use plain syntax and layered architecture for coding tasks with commit-based progress reports; 中文触发词包括人话编码契约、土法编码和分层交付；仅在用户明确启用本 skill 时使用。
+description: Use plain syntax and layered architecture for coding tasks with commit-based progress reports; new features require investigating existing code, a confirmed short spec, a dedicated branch, and a pull request merge after acceptance; 中文触发词包括人话编码契约、土法编码和分层交付；仅在用户明确启用本 skill 时使用。
 ---
 
 # Human Coding Contract
@@ -44,9 +44,57 @@ If `Edit` cannot find `old_string`:
 
 Running `gofmt` / `eslint --fix` from the shell after an editor change is allowed. Using the shell as a substitute for the editor is not.
 
+## New feature gate
+
+Apply this only to a new feature, or to a behavior change whose "done" cannot be judged from the chat alone. Do not apply it to a bugfix, a one-line or single-function change, a question, a review, or when the user explicitly says to stay on the current branch or skip the pull request.
+
+Do not edit code and do not create the branch until the spec is confirmed.
+
+1. Investigate the existing code first. Read the neighboring feature in layer order: entity → data → business → entry. Record the real types, errors, routes, tests, and style already in the repo. Do not invent a parallel stack, sample payload, or "typical" API.
+
+2. Write a short spec in the conversation. Do not add a spec file unless the user asks, or the repo already keeps specs. Small tasks may merge sections. Never drop these four: 目标, 非目标, 验收标准, 失败与回滚. Add 接口/数据, 依赖与影响, and 测试 only when the investigation shows they matter. Do not paste a long template. Put every undecided choice in 开放问题; do not hide it in the plan.
+
+   ```
+   【Spec，等确认】
+
+   标题：[模块] 动作/结果
+   基线分支：[main / master / 当前默认分支]
+
+   现状：
+   - [读过的现有路径]：[已经怎么做，准备复用什么]
+
+   背景：
+   - [为什么做；不做会怎样]
+
+   目标：
+   - [可判定的结果]
+
+   非目标：
+   - [这次明确不做的事]
+
+   验收：
+   - [Given / When / Then，或可执行清单]
+
+   失败与回滚：
+   - [失败时怎么停、怎么撤；无数据变更就写明无需回滚]
+
+   开放问题：
+   - [没有就写“无”]
+   ```
+
+3. Stop and wait. `继续`, `1`, or an explicit approval confirms this spec. A requirements sentence is not confirmation. If an open question blocks the acceptance criteria, ask and wait.
+
+4. After confirmation, create one branch from the named base branch before the first edit. Name it `feat/<short-slug>` unless the user names another branch. Do not develop the feature on the default branch, and do not pile it onto an unrelated dirty branch. If this is not a git repository, or the base branch cannot be determined, stop and say so. Do not pretend a branch or pull request exists.
+
+5. Implement only on that branch. The collaboration cadence still applies: one logical commit at a time, stop for review, and commit only after `继续` or `1`. Do not push those commits early. The last `继续` approves that commit only. It is not acceptance of the whole feature and it is not permission to merge.
+
+6. When every agreed logical goal is committed, stop for acceptance. Do not push or open a pull request yet. After the user explicitly accepts — `验收通过` or `合并` — push the feature branch, open a pull request into the base branch, and merge it. The pull request body is the confirmed spec plus the check results, not a new design. If checks fail, the remote is missing, or the pull request cannot merge, stop and report the blocker. Do not merge into the default branch with a local merge that skips the pull request.
+
+If the user explicitly opts out of the branch or the pull request, say that exception once and follow the rest of this contract on the branch they named.
+
 ## Collaboration cadence
 
-1. If required background is missing, ask for it and wait; do not guess. When the goal is sufficiently specified, list the files, each responsibility, and the planned commit scope for visibility. Then implement the agreed goal without waiting for a separate confirmation. Do not repeat the same inventory for later commits in that goal.
+1. If required background is missing, ask for it and wait; do not guess. A new feature must pass the New feature gate first. After that spec is confirmed and the feature branch exists, list the files, each responsibility, and the planned commit scope for visibility, then implement the agreed goal without waiting for a second confirmation of that inventory. Do not repeat the same inventory for later commits in that goal. Bugfixes and changes the user explicitly kept off the gate still list the files and then implement without a spec confirmation.
 2. Design in this order: entity → data → business → entry. A continuous work segment may cover several related layers and files, but each proposed commit must represent one clear logical goal and must not bundle many independent features.
 3. Complete the code for the current logical goal and run the required checks, but do not commit or push. Pause once. In that same stop, show the review path and the progress report. Do not paste the full git diff into the conversation. Do not wait for review and then wait again after the commit. The exact 【停，等指令】 block below is mandatory; a casual prose summary does not count. Do not skip the template because the change looks small.
 
@@ -156,3 +204,5 @@ Static checks are required. Before asking for review or committing, the change m
 10. New code matches the style of existing modules in the same layer; no second style was introduced for this feature.
 11. The main path is readable at a glance and does not depend on advanced syntax or extra engineering to make sense.
 12. Source, tests, and docs were changed only with Edit / Write / apply_patch; no shell or Python rewriting.
+13. A new feature was investigated and its spec was confirmed before the first edit.
+14. New-feature commits are on the dedicated branch, not the default branch. The pull request is opened and merged only after explicit acceptance of the whole feature, not after `继续`.
